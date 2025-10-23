@@ -54,10 +54,8 @@
                     c.RoutePrefix = string.Empty; // open Swagger UI at root (https://localhost:5001/)
                 });
             }
-            else
-            {
-                app.UseMiddleware<ErrorHandlingMiddleware>();
-            }
+
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
             app.UseHttpsRedirection();
 

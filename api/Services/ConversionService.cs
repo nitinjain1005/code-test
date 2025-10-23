@@ -19,55 +19,53 @@ namespace api.Services
             _logger = logger;
         }
 
-        public async Task<Account> GetConvertedAccount(string targetCurrency)
+        public async Task<Account> GetConvertedAccount(string currency)
         {
-            if (string.IsNullOrWhiteSpace(targetCurrency))
+            if (string.IsNullOrWhiteSpace(currency))
             {
                 const string msg = "Currency must be provided.";
                 _logger.LogWarning(msg);
-                throw new ArgumentException(msg, nameof(targetCurrency));
+                throw new ArgumentException(msg, nameof(currency));
             }
-           
-                var account = await _accountService.GetAccount()
-                    ?? throw new InvalidOperationException("Account service returned null.");
 
-                // No conversion needed
-                if (string.Equals(account.Currency, targetCurrency, StringComparison.OrdinalIgnoreCase))
-                {
-                    _logger.LogInformation("No conversion needed. Account already in {Currency}.", targetCurrency);
-                    return account;
-                }
+            var account = await _accountService.GetAccount()
+                ?? throw new InvalidOperationException("Account service returned null.");
 
-                var exchangeRate = await _exchangeRateService.GetExchangeRate()
-                    ?? throw new InvalidOperationException("Exchange rate service returned null.");
+            // No conversion needed
+            if (string.Equals(account.Currency, currency, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation("No conversion needed. Account already in {Currency}.", currency);
+                return account;
+            }
 
-                var target = exchangeRate.Currencies?
-                    .FirstOrDefault(c => string.Equals(c.Name, targetCurrency, StringComparison.OrdinalIgnoreCase))
-                    ?? throw new ArgumentException($"Currency '{targetCurrency}' not found in exchange rates.");
+            var exchangeRate = await _exchangeRateService.GetExchangeRate()
+                ?? throw new InvalidOperationException("Exchange rate service returned null.");
 
-                decimal rate = target.ExchangeRate;
+            var target = exchangeRate.Currencies?
+                .FirstOrDefault(c => string.Equals(c.Name, currency, StringComparison.OrdinalIgnoreCase))
+                ?? throw new ArgumentException($"Currency '{currency}' not found in exchange rates.");
 
-                var convertedAccount = new Account
-                {
-                    AccountNumber = account.AccountNumber,
-                    Currency = targetCurrency,
-                    Balance = Math.Round(account.Balance * rate, 2),
-                    Transactions = account.Transactions?
-                        .Select(t => new Transaction
-                        {
-                            Date = t.Date,
-                            Balance = Math.Round(t.Balance * rate, 2)
-                        })
-                        .ToList() ?? new List<Transaction>()
-                };
+            var convertedAccount = new Account
+            {
+                AccountNumber = account.AccountNumber,
+                Currency = currency,
+                Balance = Math.Round(account.Balance * target.ExchangeRate, 2),
+                Transactions = account.Transactions?
+                    .Select(t => new Transaction
+                    {
+                        Date = t.Date,
+                        Balance = Math.Round(t.Balance * target.ExchangeRate, 2)
+                    })
+                    .ToList() ?? new List<Transaction>()
+            };
 
-                _logger.LogInformation(
-                    "Successfully converted account from {FromCurrency} to {ToCurrency} with rate {Rate}.",
-                    account.Currency, targetCurrency, rate);
+            _logger.LogInformation(
+                "Successfully converted account from {FromCurrency} to {ToCurrency} with rate {Rate}.",
+                account.Currency, currency, target.ExchangeRate);
 
-                return convertedAccount;
-           
-           
+            return convertedAccount;
+
+
         }
     }
 }

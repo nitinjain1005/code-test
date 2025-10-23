@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using api.Models;
+﻿using api.Models;
 
 namespace api.Services
 {

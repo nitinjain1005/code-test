@@ -19,6 +19,18 @@ namespace api.Middleware
             {
                 await _next(context);
             }
+
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid Arguments error");
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                await context.Response.WriteAsJsonAsync(new ProblemDetails
+                {
+                    Title = "Incorrect Input",
+                    Detail = ex.Message,
+                    Status = StatusCodes.Status400BadRequest
+                });
+            }
             catch (ExtServiceException ex)
             {
                 _logger.LogWarning(ex, "External service error");
@@ -26,10 +38,23 @@ namespace api.Middleware
                 await context.Response.WriteAsJsonAsync(new ProblemDetails
                 {
                     Title = "External service unavailable",
-                    Detail = "Upstream service returned an error.",
+                    Detail = ex.Message,
                     Status = StatusCodes.Status503ServiceUnavailable
                 });
             }
+
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "External service error");
+                context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+                await context.Response.WriteAsJsonAsync(new ProblemDetails
+                {
+                    Title = "No Data returned from external service.",
+                    Detail = ex.Message,
+                    Status = StatusCodes.Status500InternalServerError
+                });
+            }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unhandled exception");

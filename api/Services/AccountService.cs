@@ -18,7 +18,7 @@ namespace api.Services
         {
             _logger.LogInformation("Calling external Account API: {Url}", _httpClient.BaseAddress);
 
-                var response = await _httpClient.GetAsync("");
+                var response = await _httpClient.GetAsync("/account.json");
 
                 if (!response.IsSuccessStatusCode)
                 {

@@ -26,38 +26,27 @@ namespace api.Controllers
         {
             if (string.IsNullOrWhiteSpace(currency))
                 return BadRequest("Parameter currency is required."); // Should be handled at central level.
-            try
+
+            var convertedAccount = await _conversionService.GetConvertedAccount(currency);
+            if (convertedAccount == null)
+                return NotFound("Account details or conversion failed.");
+
+
+            var (highestEarningStart, highestEarningEnd, balanceChange) =
+                _transactionService.GetHighestPositiveBalanceChange(convertedAccount.Transactions);
+
+            return new AccountResponse
             {
-                var convertedAccount = await _conversionService.GetConvertedAccount(currency);
-                if (convertedAccount == null)
-                    return NotFound("Account details or conversion failed.");
+                AccountNumber = convertedAccount.AccountNumber,
+                Balance = convertedAccount.Balance,
+                Currency = convertedAccount.Currency,
+                HighestBalanceChangeStart = highestEarningStart,
+                HighestBalanceChangeEndDate = highestEarningEnd,
+                Transactions = convertedAccount.Transactions,
+                HighestBalanceChange = balanceChange
+            };
 
-
-                var (highestEarningStart, highestEarningEnd, balanceChange) =
-                    _transactionService.GetHighestPositiveBalanceChange(convertedAccount.Transactions);
-
-                return new AccountResponse
-                {
-                    AccountNumber = convertedAccount.AccountNumber,
-                    Balance = convertedAccount.Balance,
-                    Currency = convertedAccount.Currency,
-                    HighestBalanceChangeStart = highestEarningStart,
-                    HighestBalanceChangeEndDate = highestEarningEnd,
-                    Transactions = convertedAccount.Transactions,
-                    HighestBalanceChange = balanceChange
-                };
-
-            }
-            catch (ExtServiceException ex)
-            {
-                _logger.LogError(ex, "External service failed");
-                return StatusCode(503, $"External service unavailable: {ex.Message}"); //// Should be better .
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Internal server error");
-                return StatusCode(500, $"Internal server error: {ex.Message}"); // Should be better .
-            }
         }
+
     }
 }

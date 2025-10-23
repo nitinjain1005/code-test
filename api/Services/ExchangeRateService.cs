@@ -20,7 +20,7 @@ namespace api.Services
         {
 
                 _logger.LogInformation("Calling ExchangeRateService API: {Url}", _httpClient.BaseAddress);
-                var response = await _httpClient.GetAsync("");
+                var response = await _httpClient.GetAsync("/currencies.json");
 
                 if (!response.IsSuccessStatusCode)
                 {
