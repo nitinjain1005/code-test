@@ -1,4 +1,3 @@
-using api.Common;
 using api.Services;
 using apitests.Mocks;
 using Microsoft.Extensions.Logging;
@@ -28,7 +27,7 @@ namespace apitests
 
         private IConversionService GetConversionService()
         {
-             return new ConversionService(_mockAccountService, _mockExchangeRateService, _logger);
+            return new ConversionService(_mockAccountService, _mockExchangeRateService, _logger);
         }
 
         [TestMethod]
@@ -45,6 +44,11 @@ namespace apitests
         public async Task Given_Account_And_ExchangeRate_When_Converting_A_Service_With_Not_Found_Currency_It_Should_Throw()
         {
             await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.GetConvertedAccount("NOT_VALID"));
+        }
+        [TestMethod]
+        public async Task GetConvertedAccount_ShouldThrow_WhenCurrencyIsEmpty()
+        {
+            await Assert.ThrowsExceptionAsync<ArgumentException>(() => _sut.GetConvertedAccount(""));
         }
     }
 }
