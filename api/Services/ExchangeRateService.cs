@@ -24,7 +24,7 @@ namespace api.Services
         {
 
                 _logger.LogInformation("Calling ExchangeRateService API: {Url}", _httpClient.BaseAddress);
-                var response = await _httpClient.GetAsync(_config.Value.AccountEndpoint);
+                var response = await _httpClient.GetAsync(_config.Value.ExchangeRateEndpoint);
 
                 if (!response.IsSuccessStatusCode)
                 {
