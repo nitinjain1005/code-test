@@ -34,12 +34,12 @@ namespace api.Middleware
             catch (ExtServiceException ex)
             {
                 _logger.LogWarning(ex, "External service error");
-                context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
+                context.Response.StatusCode = ex.StatusCode > 0 ?(int) ex.StatusCode :(int) StatusCodes.Status503ServiceUnavailable; ;
                 await context.Response.WriteAsJsonAsync(new ProblemDetails
                 {
                     Title = "External service unavailable",
                     Detail = ex.Message,
-                    Status = StatusCodes.Status503ServiceUnavailable
+                    Status = context.Response.StatusCode
                 });
             }
 

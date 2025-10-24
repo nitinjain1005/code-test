@@ -2,8 +2,9 @@
 {
     public class ExternalServices
     {
-        public string ExchangeRateUrl { get; set; } = string.Empty;
-        public string AccountUrl { get; set; } = string.Empty;
+        public string BaseUrl { get; set; } = string.Empty;
+        public string ExchangeRateEndpoint { get; set; } = string.Empty;
+        public string AccountEndpoint { get; set; } = string.Empty;
 
     }
 }
