@@ -35,7 +35,7 @@ namespace api.Controllers
             var (highestEarningStart, highestEarningEnd, balanceChange) =
                 _transactionService.GetHighestPositiveBalanceChange(convertedAccount.Transactions);
 
-            return new AccountResponse
+            return Ok(new AccountResponse
             {
                 AccountNumber = convertedAccount.AccountNumber,
                 Balance = convertedAccount.Balance,
@@ -44,7 +44,7 @@ namespace api.Controllers
                 HighestBalanceChangeEndDate = highestEarningEnd,
                 Transactions = convertedAccount.Transactions,
                 HighestBalanceChange = balanceChange
-            };
+            });
 
         }
 
